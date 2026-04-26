@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <time.h>
+#include <LiquidCrystal.h> // If using an LCD
+
+// Define pins (adjust to your hardware)
+const int ledPin = 13;
+const int potPin = A0;
+const int lcdRS = 12, lcdEn = 11, lcdD4 = 5, lcdD5 = 4, lcdD6 = 3, lcdD7 = 2;
+
+LiquidCrystal lcd(lcdRS, lcdEn, lcdD4, lcdD5, lcdD6, lcdD7);
+
+// Parameters
+int seconds = 10;
+int blinkRate = 500; // Initial blink rate (milliseconds)
+int potThreshold = 800; //  Potentiometer value to trigger pause.  Adjust as needed.
+
+// Global Variables
+int potValue;
+bool timerRunning = true;
+
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  lcd.begin(16, 2); // Adjust to your LCD's dimensions
+  lcd.print("Countdown Timer");
+  delay(2000);
+}
+
+void loop() {
+  // 1. Read Potentiometer
+  potValue = analogRead(potPin);
+
+  // 2. Check for Pause Condition
+  if (potValue >= potThreshold && timerRunning) {
+    pauseTimer();
+  }
+
+  // 3. Update Display
+  updateDisplay();
+
+  // 4. Timer Logic
+  if (timerRunning) {
+    delay(1000); // Control the timer speed
+    if (seconds > 0) {
+      seconds--;
+    } else {
+      timerRunning = false;
+      lcd.clear();
+      lcd.print("Time's Up!");
+    }
+  }
+
+  //5. LED Blinking Control
+  if(timerRunning){
+      digitalWrite(ledPin, HIGH);
+      delay(blinkRate);
+      digitalWrite(ledPin, LOW);
+      delay(blinkRate);
+  }
+}
+
+
+void updateDisplay() {
+    lcd.clear();
+    lcd.print("Seconds: ");
+    lcd.print(seconds);
+}
+
+void pauseTimer() {
+    lcd.clear();
+    lcd.print("Paused!");
+    timerRunning = false;
+}
